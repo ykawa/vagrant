@@ -1,0 +1,25 @@
+---
+- name: setup repository.
+  import_tasks: debian.yml
+  when:
+    - ansible_distribution|lower == 'ubuntu'
+
+- name: setup repository. redhat
+  import_tasks: redhat.yml
+  when:
+    - ansible_distribution|lower == 'redhat'
+
+- name: Install docker-ce
+  package:
+    name: "docker-ce"
+    state: present
+  notify: restart
+  become: true
+
+- name: Modify group settings.
+  user:
+    name: "{{ ansible_env.USER }}"
+    groups: docker
+    append: yes
+  become: true
+

@@ -1,0 +1,19 @@
+---
+# vi: set ft=yaml.ansible :
+- name: "fetch docker-machine {{ version }}"
+  become: true
+  get_url:
+    url: "https://github.com/docker/machine/releases/download/{{ version }}/docker-machine-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: "{{ install_path }}/docker-machine-{{ version }}"
+    mode: 0755
+    force: no
+    checksum: sha256:a4c69bffb78d3cfe103b89dae61c3ea11cc2d1a91c4ff86e630c9ae88244db02
+  register: docker_machine
+
+- name: create symbolic link
+  become: true
+  file:
+    src: "{{ install_path }}/docker-machine-{{ version }}"
+    dest: "{{ install_path }}/docker-machine"
+    state: link
+  when: docker_machine.changed

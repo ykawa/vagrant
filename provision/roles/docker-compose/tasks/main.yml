@@ -1,0 +1,19 @@
+---
+# vi: set ft=yaml.ansible :
+- name: fetch docker-compose {{ version }}
+  become: true
+  get_url:
+    url: "https://github.com/docker/compose/releases/download/{{ version }}/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
+    dest: "{{ install_path }}/docker-compose-{{ version }}"
+    mode: 0755
+    force: no
+    checksum: sha256:8a11713e11ed73abcb3feb88cd8b5674b3320ba33b22b2ba37915b4ecffdf042
+  register: docker_compose
+
+- name: create symbolic link
+  become: true
+  file:
+    src: "{{ install_path }}/docker-compose-{{ version }}"
+    dest: "{{ install_path }}/docker-compose"
+    state: link
+  when: docker_compose.changed

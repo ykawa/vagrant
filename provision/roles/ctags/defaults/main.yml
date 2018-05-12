@@ -1,0 +1,3 @@
+---
+prefix: /usr/local
+dest: "{{ prefix }}/src/ctags"

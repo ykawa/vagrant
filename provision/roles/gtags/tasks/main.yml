@@ -1,0 +1,66 @@
+---
+# vi: set ft=yaml.ansible :
+- name: install dependencies
+  import_tasks: debian.yml
+  when:
+    - ansible_os_family|lower == 'debian'
+
+- import_tasks: redhat.yml
+  when:
+    - ansible_os_family|lower == 'redhat'
+
+- name: fetch source
+  become: true
+  get_url:
+    url: "http://ftpmirror.gnu.org/global/global-{{ version }}.tar.gz"
+    dest: "{{ source_directory }}/global-{{ version }}.tar.gz"
+    force: no
+    checksum: md5:3137e0746491a7e6e881e5803fc1bf1b
+  register: tarball
+
+- name: "+++ {{ tarball }}"
+  debug:
+    msg: "+++ {{ tarball }} +++"
+
+- name: mkdir "{{ dest }}"
+  become: true
+  file:
+    path: "{{ dest }}"
+    state: directory
+  when: tarball.changed
+
+- name: unarchive tarball
+  become: true
+  unarchive:
+    src: "{{ source_directory }}/global-{{ version }}.tar.gz"
+    dest: "{{ source_directory }}"
+    remote_src: yes
+  when: tarball.changed
+
+- name: configure
+  become: true
+  command: >
+    ./configure
+    --prefix="{{ prefix }}"
+    --enable-dependency-tracking
+    --enable-shared=yes
+    --enable-static=yes
+    --enable-ltdl-install
+    --enable-gtagscscope
+  args:
+    chdir: "{{ dest }}"
+  when: tarball.changed
+
+- name: make all
+  become: true
+  make:
+    chdir: "{{ dest }}"
+  when: tarball.changed
+
+- name: make install
+  become: true
+  make:
+    chdir: "{{ dest }}"
+    target: install
+  when: tarball.changed
+

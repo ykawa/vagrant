@@ -1,0 +1,49 @@
+---
+# vi: set ft=yaml.ansible :
+- name: update sources.list
+  become: true
+  replace:
+    path: /etc/apt/sources.list
+    regexp: 'http://archive.ubuntu.com/ubuntu'
+    replace: 'http://ftp.riken.go.jp/Linux/ubuntu'
+    backup: yes
+
+- name: Update all packages to the latest version
+  become: true
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: install dependences for debian/ubuntu
+  become: true
+  apt:
+    pkg: "{{ item }}"
+    update_cache: yes
+    cache_valid_time: 3600
+    state: present
+  with_items:
+    - pkg-config
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg2
+    - software-properties-common
+
+- name: Add Docker’s official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/{{ ansible_distribution|lower }}/gpg
+    state: present
+  become: true
+
+- name: Add Docker CE repository (Ubuntu/Debian)
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} stable
+    state: present
+    filename: 'docker-ce'
+  become: true
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: true
+

@@ -1,0 +1,37 @@
+---
+- hosts: all
+  name: playbook.yml
+  gather_facts: yes
+
+  tasks:
+  - name: set timezone to Asia/Tokyo
+    become: true
+    timezone:
+      name: Asia/Tokyo
+
+  - name: "setup vim8"
+    import_role:
+      name: vim
+
+  - name: "setup universal ctags"
+    import_role:
+      name: ctags
+
+  - name: "setup gnu global"
+    import_role:
+      name: gtags
+    vars:
+      version: 6.6.2
+
+  - name: "setup docker-ce"
+    import_role:
+     name: docker-ce
+
+  - name: "setup docker-compose"
+    import_role:
+     name: docker-compose
+
+  - name: "setup docker-machine"
+    import_role:
+     name: docker-machine
+

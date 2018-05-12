@@ -1,0 +1,52 @@
+---
+# vi: set ft=yaml.ansible :
+- name: install dependencies
+  import_tasks: debian.yml
+  when:
+    - ansible_os_family|lower == 'debian'
+
+- import_tasks: redhat.yml
+  when:
+    - ansible_os_family|lower == 'redhat'
+
+- name: fetch source
+  become: true
+  git:
+    repo: 'https://github.com/vim/vim.git'
+    dest: "{{ dest }}"
+    clone: yes
+    update: yes
+  register: gitclone
+
+- name: configure
+  become: true
+  command: >
+    ./configure
+    --prefix="{{ prefix }}"
+    --enable-fail-if-missing
+    --with-features=huge
+    --enable-multibyte
+    --enable-cscope
+    --enable-luainterp
+    --with-luajit
+    --enable-python3interp
+    --enable-rubyinterp
+    --enable-perlinterp
+  args:
+    chdir: "{{ dest }}"
+  when: gitclone.changed
+
+- name: make all
+  become: true
+  make:
+    chdir: "{{ dest }}"
+  when: gitclone.changed
+
+
+- name: make install
+  become: true
+  make:
+    chdir: "{{ dest }}"
+    target: install
+  when: gitclone.changed
+

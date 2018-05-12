@@ -1,0 +1,51 @@
+---
+# vi: set ft=yaml.ansible :
+- name: install dependencies
+  import_tasks: debian.yml
+  when:
+    - ansible_os_family|lower == 'debian'
+
+- import_tasks: redhat.yml
+  when:
+    - ansible_os_family|lower == 'redhat'
+
+- name: fetch source
+  become: true
+  git:
+    repo: 'https://github.com/universal-ctags/ctags.git'
+    dest: "{{ dest }}"
+    clone: yes
+    update: yes
+  register: gitclone
+
+- name: run autogen.sh
+  become: true
+  shell: ./autogen.sh
+  args:
+    chdir: "{{ dest }}"
+    creates: "{{ dest }}/configure"
+  when: gitclone.changed
+
+- name: configure
+  become: true
+  command: >
+    ./configure
+    --prefix="{{ prefix }}"
+    --disable-aspell
+  args:
+    chdir: "{{ dest }}"
+  when: gitclone.changed
+
+- name: make all
+  become: true
+  make:
+    chdir: "{{ dest }}"
+  when: gitclone.changed
+
+- name: make install
+  become: true
+  make:
+    chdir: "{{ dest }}"
+    target: install
+  when: gitclone.changed
+

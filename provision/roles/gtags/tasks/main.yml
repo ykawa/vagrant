@@ -15,7 +15,7 @@
     url: "https://ftp.gnu.org/pub/gnu/global/global-{{ version }}.tar.gz"
     dest: "{{ source_directory }}/global-{{ version }}.tar.gz"
     force: no
-    checksum: md5:3137e0746491a7e6e881e5803fc1bf1b
+    checksum: md5:a784c2d13ddaccd31bcd131f11cd419f
   register: tarball
 
 - name: "+++ {{ tarball }}"

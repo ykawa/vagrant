@@ -1,5 +1,5 @@
 ---
-version: 6.6.2
+version: 6.6.3
 prefix: /usr/local
 source_directory: "{{ prefix }}/src"
 dest: "{{ source_directory }}/global-{{ version }}"

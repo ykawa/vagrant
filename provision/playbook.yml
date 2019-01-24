@@ -21,7 +21,7 @@
     import_role:
       name: gtags
     vars:
-      version: 6.6.2
+      version: 6.6.3
 
   - name: "setup docker-ce"
     import_role:
